@@ -826,6 +826,32 @@ void Adafruit_NeoPixel::setPixelColor(
   }
 }
 
+// Set pixel color from separate R,G,B components with brightness:
+void Adafruit_NeoPixel::setPixelColor(
+ uint16_t n, uint8_t r, uint8_t g, uint8_t b, uint8_t brightness) {
+  if(n < numLEDs) {
+    if(brightness) { // See notes in setBrightness()
+      r = (r * brightness) >> 8;
+      g = (g * brightness) >> 8;
+      b = (b * brightness) >> 8;
+    }
+    uint8_t *p = &pixels[n * 3];
+#ifdef NEO_RGB
+    if((type & NEO_COLMASK) == NEO_GRB) {
+#endif
+      *p++ = g;
+      *p++ = r;
+#ifdef NEO_RGB
+    } else {
+      *p++ = r;
+      *p++ = g;
+    }
+#endif
+    *p = b;
+  }
+}
+
+
 // Set pixel color from 'packed' 32-bit RGB color:
 void Adafruit_NeoPixel::setPixelColor(uint16_t n, uint32_t c) {
   if(n < numLEDs) {
@@ -844,6 +870,35 @@ void Adafruit_NeoPixel::setPixelColor(uint16_t n, uint32_t c) {
     p[bOffset] = b;
   }
 }
+
+// Set pixel color from 'packed' 32-bit RGB color with brightness:
+void Adafruit_NeoPixel::setPixelColor(uint16_t n, uint32_t c, uint8_t brightness) {
+  if(n < numLEDs) {
+    uint8_t
+      r = (uint8_t)(c >> 16),
+      g = (uint8_t)(c >>  8),
+      b = (uint8_t)c;
+    if(brightness) { // See notes in setBrightness()
+      r = (r * brightness) >> 8;
+      g = (g * brightness) >> 8;
+      b = (b * brightness) >> 8;
+    }
+    uint8_t *p = &pixels[n * 3];
+#ifdef NEO_RGB
+    if((type & NEO_COLMASK) == NEO_GRB) {
+#endif
+      *p++ = g;
+      *p++ = r;
+#ifdef NEO_RGB
+    } else {
+      *p++ = r;
+      *p++ = g;
+    }
+#endif
+    *p = b;
+  }
+}
+
 
 // Convert separate R,G,B into packed 32-bit RGB color.
 // Packed format is always RGB, regardless of LED strand color order.
